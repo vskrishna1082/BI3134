@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
 # Align nucleotide sequences with global dynamic programming
-# (!)returns only one of the best scoring alignments
 
 import timeit
 import numpy as np
@@ -10,6 +9,7 @@ from collections import deque
 seq_a= "ATGTATGCTGCTGCATTGTCTGATCG"
 seq_b= "AATGTAATGCGCTGTCGATCGTAGCT"
 alignments=[]
+
 # Define a Substitution Matrix and Gap Penality
 subs_matrix = np.array([[2,0,1,0],[0,2,0,1],[1,0,2,0],[0,1,0,2]]) 
 gp = 4 # matrix generation fails when gp=0
