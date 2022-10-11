@@ -1,24 +1,27 @@
 #! /usr/bin/env python3
-# Align nucleotide sequences with global dynamic programming
+# Align DNA/Protein sequences with Needleman-Wunsch global dynamic programming
 
 import timeit
 import numpy as np
+import symloader
 from collections import deque
 
 # Provide a sequence string
-seq_a= "ATTGTCGATGCTGTCGGACGC"
-seq_b= "AATTTCAGTCATCGATCAGCTACGCTACGCAA"
+seq_a= "ARNDCQEGHILKMFPSTWYVBZX"
+seq_b= "ACKMPSYVBEGHILTNDZXWVZR"
 alignments=[]
 
 # Define a Substitution Matrix and Gap Penality
-subs_matrix = np.array([[2,0,1,0],[0,2,0,1],[1,0,2,0],[0,1,0,2]]) 
-gp = 4 # matrix generation fails when gp=0
+symbol_set = symloader.LoadSymbols('Protein_BLOSUM62.csv')
+subs_matrix = symbol_set.subScores
+gp = symbol_set.gapPenality # matrix generation fails when gp=0
 
 # Convert string of input to numbered list of nucleotides
-nuLib=["A","T","G","C"] # Library of symbols
-def numSeq(x):
+symLib = symbol_set.symLibrary # Library of symbols
+
+def numSeq(x): # numerize Sequence
     def nuNum(x):
-        for idx, i in enumerate(nuLib):
+        for idx, i in enumerate(symLib):
             if x==i:
                 return idx
                 break # stop at first match
@@ -80,8 +83,8 @@ def trace_alignment(st_matrix):
     curr_tback = st_matrix[1][y][x]
 
     def move_diagonal(al_seq1,al_seq2, pos_x, pos_y):
-        al_seq1.appendleft(nuLib[seq1[pos_x-1]])
-        al_seq2.appendleft(nuLib[seq2[pos_y-1]])
+        al_seq1.appendleft(symLib[seq1[pos_x-1]])
+        al_seq2.appendleft(symLib[seq2[pos_y-1]])
         pos_y+=-1
         pos_x+=-1
         tback = st_matrix[1][pos_y][pos_x]
@@ -89,7 +92,7 @@ def trace_alignment(st_matrix):
 
     def move_left(al_seq1,al_seq2, pos_x, pos_y):
         pos_x+=-1
-        al_seq1.appendleft(nuLib[seq1[pos_x]])
+        al_seq1.appendleft(symLib[seq1[pos_x]])
         al_seq2.appendleft('-')
         tback = st_matrix[1][pos_y][pos_x]
         return (tback,pos_x,pos_y)
@@ -97,19 +100,19 @@ def trace_alignment(st_matrix):
     def move_up(al_seq1,al_seq2, pos_x, pos_y):
         pos_y+=-1
         al_seq1.appendleft('-')
-        al_seq2.appendleft(nuLib[seq2[pos_y]])
+        al_seq2.appendleft(symLib[seq2[pos_y]])
         tback = st_matrix[1][pos_y][pos_x]
         return (tback,pos_x,pos_y)
 
     def branch_diagonal():
         sub_align = trace_alignment(st_matrix[:,:y,:x])
-        sub_align[0].append(nuLib[seq1[x-1]])
-        sub_align[1].append(nuLib[seq2[y-1]])
+        sub_align[0].append(symLib[seq1[x-1]])
+        sub_align[1].append(symLib[seq2[y-1]])
         alignments.append(sub_align)
 
     def branch_left():
         sub_align = trace_alignment(st_matrix[:,:y+1,:x])
-        sub_align[0].append(nuLib[seq1[x-1]])
+        sub_align[0].append(symLib[seq1[x-1]])
         sub_align[1].append('-')
         alignments.append(sub_align)
 
