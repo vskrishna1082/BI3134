@@ -6,8 +6,8 @@ import numpy as np
 from collections import deque
 
 # Provide a sequence string
-seq_a= "ATGTATGCTGCTGCATTGTCTGATCG"
-seq_b= "AATGTAATGCGCTGTCGATCGTAGCT"
+seq_a= "ATTGTCGATGCTGTCGGACGC"
+seq_b= "AATTTCAGTCATCGATCAGCTACGCTACGCAA"
 alignments=[]
 
 # Define a Substitution Matrix and Gap Penality
@@ -72,7 +72,7 @@ def dyn_prog_matrix(seq1, seq2):
     return(st_m)
 
 # Trace best alignment from scoring and traceack matrices
-def trace_alignment(st_matrix):
+def trace_alignment(st_matrix): 
     a_seq1 = deque() # aligned sequences as lists
     a_seq2 = deque()
     x = np.size(st_matrix,axis=2)-1
@@ -102,22 +102,16 @@ def trace_alignment(st_matrix):
         return (tback,pos_x,pos_y)
 
     def branch_diagonal():
-        branch = [a_seq1.copy(),a_seq2.copy()]
-        branch[0].appendleft(nuLib[seq1[x-1]])
-        branch[1].appendleft(nuLib[seq2[y-1]])
         sub_align = trace_alignment(st_matrix[:,:y,:x])
-        branch[0]=sub_align[0]+branch[0] 
-        branch[1]=sub_align[1]+branch[1]
-        alignments.append(tuple(branch))
+        sub_align[0].append(nuLib[seq1[x-1]])
+        sub_align[1].append(nuLib[seq2[y-1]])
+        alignments.append(sub_align)
 
     def branch_left():
-        branch = [a_seq1.copy(),a_seq2.copy()]
-        branch[0].appendleft(nuLib[seq1[x-1]])
-        branch[1].appendleft('-')
         sub_align = trace_alignment(st_matrix[:,:y+1,:x])
-        branch[0]=sub_align[0]+branch[0] 
-        branch[1]=sub_align[1]+branch[1]
-        alignments.append(tuple(branch))
+        sub_align[0].append(nuLib[seq1[x-1]])
+        sub_align[1].append('-')
+        alignments.append(sub_align)
 
     while curr_tback != 0:
 #        print(f"{x},{y} tb= {curr_tback}") # debugging
@@ -146,12 +140,21 @@ def trace_alignment(st_matrix):
             branch_diagonal()
             branch_left()
             (curr_tback,x,y) = move_up(a_seq1,a_seq2,x,y)
-    return (a_seq1,a_seq2)
+    return [a_seq1,a_seq2]
 
 def mytestfunc():
     stmatrix=dyn_prog_matrix(seq1,seq2)
     aligned=trace_alignment(stmatrix)
     alignments.append(aligned)
+    # traceback branches start at branch breakpoint complete them:
+    for i in alignments:
+        for j in [0,1]:
+            i[j]=list(i[j])
+    for indx, i in enumerate(alignments):
+        for j in alignments[indx:]:
+            if len(j[0])>len(i[0]):
+                i[0]+=j[0][len(i[0]):]
+                i[1]+=j[1][len(i[1]):]
     for idx, i in enumerate(alignments):
         print('\nSequence '+str(idx+1)+':\n'+''.join(i[0])+'\n'+''.join(i[1]))
     print("Score: "+str(stmatrix[0][len(seq2)][len(seq1)]))
