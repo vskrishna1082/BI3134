@@ -52,11 +52,13 @@ def dyn_prog_matrix(seq1, seq2):
     ls1 = len(seq1)
     ls2 = len(seq2)
     # add top-row and first-column to array
-    s_m_tr = np.arange(-gp, -gp*(ls1+1), -gp) # scoringMatrix topRow
+    if gp != 0 : s_m_tr = np.arange(-gp, -gp*(ls1+1), -gp) # scoringMatrix topRow
+    else: s_m_tr = np.zeros(shape=ls1)
     t_m_tr = np.ones(shape=(ls1)) # tracebackMatrix topRow
     st_m_tr = np.r_[[[s_m_tr]],[[t_m_tr]]] # concatenate both
 
-    s_m_fc = np.arange(0, -gp*(ls2+1), -gp).reshape(-1,1) # sM firstClmn
+    if gp != 0: s_m_fc = np.arange(0, -gp*(ls2+1), -gp).reshape(-1,1) # sM firstClmn
+    else: s_m_fc = np.zeros(shape=ls2+1).reshape(-1,1)
     t_m_fc = 2*np.ones(shape=(ls2+1)).reshape(-1,1) # tM firstClmn
     t_m_fc[0]=0
     st_m_fc = np.r_[[s_m_fc],[t_m_fc]] # concatenate both
