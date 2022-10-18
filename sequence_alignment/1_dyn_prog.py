@@ -7,17 +7,18 @@ import symloader
 from collections import deque
 
 # Provide a sequence string
-seq_a= "ARNDCQEGHILKMFPSTWYVBZX"
-seq_b= "ACKMPSYVBEGHILTNDZXWVZR"
+seq_a= "ARNDC"
+seq_b= "ACKMP"
 alignments=[]
+substitution_matrix= 'Protein_BLOSUM62.csv'
 
 # Define a Substitution Matrix and Gap Penality
-symbol_set = symloader.LoadSymbols('Protein_BLOSUM62.csv')
-subs_matrix = symbol_set.subScores
-gp = symbol_set.gapPenality # matrix generation fails when gp=0
+substituition_data = symloader.LoadSymbols(substitution_matrix)
+subs_matrix = substituition_data.subScores
+gp = substituition_data.gapPenality # matrix generation fails when gp=0
 
 # Convert string of input to numbered list of nucleotides
-symLib = symbol_set.symLibrary # Library of symbols
+symLib = substituition_data.symLibrary # Library of symbols
 
 def numSeq(x): # numerize Sequence
     def nuNum(x):
@@ -149,6 +150,7 @@ def trace_alignment(st_matrix):
 
 def mytestfunc():
     stmatrix=dyn_prog_matrix(seq1,seq2)
+    print(stmatrix[0])
     aligned=trace_alignment(stmatrix)
     alignments.append(aligned)
     # traceback branches start at branch breakpoint complete them:
@@ -160,7 +162,8 @@ def mytestfunc():
             if len(j[0])>len(i[0]):
                 i[0]+=j[0][len(i[0]):]
                 i[1]+=j[1][len(i[1]):]
-    for idx, i in enumerate(alignments):
-        print('\nSequence '+str(idx+1)+':\n'+''.join(i[0])+'\n'+''.join(i[1]))
-    print("Score: "+str(stmatrix[0][len(seq2)][len(seq1)]))
-print(f"Time taken: {timeit.timeit(mytestfunc, number=1)}")
+#    for idx, i in enumerate(alignments):
+#        print('\nSequence '+str(idx+1)+':\n'+''.join(i[0])+'\n'+''.join(i[1]))
+#    print("Score: "+str(stmatrix[0][len(seq2)][len(seq1)]))
+#print(f"Time taken: {timeit.timeit(mytestfunc, number=1)}")
+mytestfunc()
