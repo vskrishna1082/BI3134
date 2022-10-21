@@ -6,5 +6,5 @@ seq_b = "ACKMP"
 substitution_matrix = "Protein_BLOSUM62.csv"
 
 seq = scoreseq.SequencePair(seq_a, seq_b, substitution_matrix)
-matrix = seq.smith_watermann()
+matrix = seq.align(method='local')
 print(matrix)
